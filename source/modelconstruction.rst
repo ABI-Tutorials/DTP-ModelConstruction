@@ -3,68 +3,113 @@
 Model Construction
 ==================
 
-This tutorial is on model construction. We aim to learn about the design of the mesh topology, aligning a template model with some data, projections of data onto surfaces, convergence of mesh fitting and embedding material fields.
+Model construction consists of:
 
-Overview
-======== 
+#. *Mesh Creation*: creating a finite element mesh with a topology and interpolation suited to describing the body of interest to the level of detail required.
+#. *Geometric Fitting*: customising the geometry of the mesh to be physically realistic, or tailored to an individual.
+#. *Material Field Definition*: describing and fitting additional spatially-varying fields which affect behaviour of the body e.g. material properties such as fibre orientations for anisotropic materials. 
 
-Model construction is an art not a science and this is especially true when it comes to fitting.  As an art it is not possible to create a full set of rules that set out the process of creating a model.  So in this tutorial we will take you through the process of model construction and the aspects that need to be considered.  This tutorial will follow an example on creating a mesh for the breast.  What we cover here is transferrable to other mesh creation problems when the right brush strokes are applied.
+This tutorial currently concentrates on geometric fitting, but gives overviews of the other topics. It uses the breast surface as the model for fitting, which is appropriate as customising breast models to individuals for simulation of deformation with change in pose, is used to assist co-locating regions of possible cancerous tissue from medical imaging made with different imaging devices which necessarily use different body poses.
 
-Here we will focus on fitting and the effects that discretisation and smoothing have on the final mesh. 
+Mesh Creation
+=============
 
-Task 1
-======
- 
-In this task we consider the design of the mesh topology.  The target system for the mesh has a big influence on the design and there are a number of factors to consider.  When creating a mesh we first create an initial or template mesh that can be related to the target system somehow.  The somehow is discussed in the next tasks where we consider mesh fitting and alignment.  The topology of the mesh needs to accurately represent the geometric features of the tissue geometry.  A mesh is made up of discrete elements and they are required to represent different tissue types (e.g. soft tissue, muscles, bones).  So the mesh must be designed so that the elements can be aligned with the structures of the target system.  But that is not all we must also think about the boundary conditions of the model, the types of interactions between the model and the external environment i.e. what types of kinematic/pressure/contact constraints will be required?
+We are concerned with constructing models consisting of 'finite elements' -- simple shapes such as triangles, squares, cubes etc. -- which join together to form a 'mesh' which covers the body and describes its topology. Over the elements of the mesh we interpolate coordinates (and eventually other fields of interest) to give the model its 3-D shape and location. Usually mesh creation involves creating the elements and specifying at least initial coordinates for the model.
 
-In this tutorial we will consider the specific example of the breast.  In this case we are considering a model of the breast that will be suitable for tracking lumps or masses within the breast.  We must consider the tissue around the breast and the bones of the ribs.  We must also consider where our data for fitting the mesh is coming from.  The data for the meshes can come from a mammmogram or an MRI.  In the case of the mammogram source the contact constraints required between the breast and compression plates must be considered.
+Common methods for creating the finite element mesh include:
 
-Using the MAP Client application load 'DTP Model Construction - Task 1' and execute the workflow.  Here we can see the anterior part of the torso including the left and right breast (excluding the arms and shoulders).  Take note of the two layers to the mesh this is to enable the fitting of the skin, muscle and rib interfaces.
+#. Automatic mesh generation to boundaries described by segmented edges, point clouds or CAD models. Automated algorithms are usually limited to creating triangle (in 2-D) or tetrahedron (3-D) elements, often used with linear or quadratic basis functions only.
+#. Generating part or all the topology from simple, standard shapes such as plates, blocks and tubes, then relying on fitting to the geometry. The models used in the geometric fitting steps below were all generated from a plate topology and the tutorial involves fitting their geometry.
+#. Manually building elements by selecting/creating corner points ('nodes') in the correct order. To ease creating a valid model, tools can assist by locking on to points from a surface or point cloud segmented from real medical images.
 
-Task 2
-======
+Surface model can be automatically extruded to 3-D models (triangles become wedges, squares become cubes). Also, different, higher-order basis functions can be used over the same topology to give more degrees of freedom in the model. This is particularly important for studying the human body as it contains few straight lines. In many models of body parts we employ C\ :sub:`1`\ -continuous cubic Hermite bases to model their inherent smoothness, and the following breast fitting examples demonstrate this. There is a downside to using Hermite bases: it is painstaking work to properly connect the mesh in areas where the topology is non-trivial, such as apex points, armpits etc.
 
-The Aligning the template model with data
+Mesh creation is a very involved topic; one needs to consider favourable alignment of elements with expected material behaviour, having sufficient density of elements to describe the problem with sufficient accuracy (the fitting examples below employ 2 different sized meshes to give some indication of the importance of mesh refinement) but overall one wishes to minimise the total number of degrees of freedom to reduce computation time. This tutorial does not go further into mesh creation at this time.
 
-Start with an existing template mesh and get user to align/register template model with a given set of data
-Use a sliding bar to manually control scaling, rotation and translation for aligning the model 
+Geometric Fitting
+=================
 
-The template model will need to be aligned and registered to a given set of data such that they are in close proximity to each other and co-exist in the same coordinate system
-Types of transformations include scaling, rotation, translation
-Both manual and automatic (e.g. k-d tree, matching landmark to target points, host mesh fitting) techniques available
+This tutorial concentrates on directly fitting generic models to data point clouds obtained from an earlier segmentation or other digitisation step. Other types of fitting not covered include:
 
-Task 3
-======
+* Fitting to modes from a Principal Component Analysis (where the variation in geometry over a population is reduced to a small number of significant mode shapes and lesser modes are discarded);
+* Host-mesh fitting where the body is embedded in a coarse, smooth 'host' mesh, data is used to morph the host mesh and the embedded 'slave' mesh is moved with it.
 
-Nonlinear least squares fitting
- 
-Projections of data onto surfaces; different methods include closest, orthogonal projections, etc.
-Important to check that data have correctly projected onto the appropriate surfaces and correct if needed
-Introduce the concept of Sobelev smoothing: only use smoothing in under-determined problems/regions, whereby there is insufficient amount of data with respect to the DOF of the mesh
+Smoothfit Tool
+--------------
 
-Perform 2D surface fitting using aligned template model and data
-Fit surfaces to different tissue types: skin, muscle and rib
-Visualisation of error projections with multiple iterations in real-time using OpenCMISS-ZINC
- 
-Task 4
-======
+Fitting the geometry of a model to a point cloud consists of 3 steps: model alignment, data point projection and the fitting itself, described in the following.
 
-Mesh convergence
+This tutorial uses the 'smoothfit' MAP client plugin for interactive fitting with these 3 steps. The inputs to smoothfit in a workflow are a model file and a point cloud file (each currently limited to EX or FieldML formats that can be read by OpenCMISS-Zinc). A practical workflow in the MAP client looks as follows, and requires only the input files to be specified (and step identifiers to be named):
 
-Investigate the effects of mesh discretisation after initial fit
-Using a set of meshes with increasing discretisation, visualise the changes in the fitted geometric model
- 
-After initial fit, decide if the current mesh discretisation is sufficient to represent the geometric features of the model.
-Perform mesh refinement and convergence analysis if required.
+.. figure:: _static/fitting-workflow.png
+   :align: center
+   :figwidth: 95%
+   :width: 90%
 
-Task 5
-======
+   Geometric fitting workflow.
 
-Investigate effects of applying Sobelev smoothing
-Use a slider bar to change smoothing parameters and visualise the changes in the model
- 
-Task 6
-======
+When the workflow is executed, the smoothfit interface is displayed showing the model as a semi-transparent surface and the point cloud as a cloud of small crosses. The initial view is of the 'align' step:
+
+.. figure:: _static/fitting-align.png
+   :align: center
+   :figwidth: 95%
+   :width: 90%
+
+   Fitting step 1: Model alignment.
+
+You can always rotate, pan and zoom the view using the standard OpenCMISS-Zinc controls of left, middle and right mouse button drag, click 'View All' to recentre the view and click 'Done' to close the step.
+
+The first step in fitting is to scale the model and bring it into alignment with the point cloud; this is done so that the projections are as simple as possible (as described below). To scale and align the model in this step, hold down the Ctrl key as you left, middle and right mouse button drag in the window: this moves the model relative to the data cloud. Be aware that rotation is a little difficult and may take practice. Other controls include alignment reset, auto centre and Load button which will load a saved alignment. (The Save button can be disabled in the smoothfit configuration so tutorialsters don't accidentally wipe the good one that is saved for progressing to the next step!)
+
+Often the shape of the model and point cloud make it pretty clear where to align to. Note that this tool uses manual alignment, but other tools may make it automatic (based on shape analysis) or semi-automatic (by identifying 3 or more points on the data cloud as being key points on the model, and automatically transforming to align with them).
+
+Step 2 in fitting is to project the data points onto the nearest location on the aligned mesh. Switch to the second page (labelled '2. Project') in the tool bar and click on the 'Project Points' button. When projections are calculated the view changes to show error bars between the data points and their projections, coloured by magnitude, plus the on-screen display of mean and maximum error:
+
+.. figure:: _static/fitting-project.png
+   :align: center
+   :figwidth: 95%
+   :width: 90%
+
+   Fitting step 2: Projecting data points.
+
+The key point is that the projections are what the fitting aims to minimise, and if they don't agree on where a point on the mesh should move to, the fit will have problems. It's good if the projection lines are short, and it's bad if they cross over each other.
+
+Switch to the next step '3. Fit' to configure and perform the fit. This is where fitting becomes less a science and more a dark art. The normal fit adjusts the coordinates to minimise the error bars; clicking the 'Perform Fit' button performs a single iteration and it may take multiple iterations to get close to the data. This is what the view looks like after a couple of iterations in the model shown:
+
+.. figure:: _static/fitting-fit.png
+   :align: center
+   :figwidth: 95%
+   :width: 90%
+
+   Fitting step 3: Perform the fit
+
+Note that the projections are not recalculated during the fitting, but you can switch back to step 2, reproject and then fit again.
+
+The penalty values allow you to smooth the fit by penalising particular deformations. The strain penalty limits excessive strain in the model so in the absense of data (or in the presence of noisy data) the solution errs towards one with minimal deformation from the initial aligned state. The edge discontinuity penalty is only useful for non-C\ :sub:`1`\ -continuous coordinate fields such as the linear dome example later. Penalties always increase the data point projection error (in a least squares sense, which is the solution method it uses), but generally give a much more attractive result. Penalty values should be adjusted in orders of magnitude until a likeable result is obtained, then fine-tuned. It is often better to use stiffer (higher penalty) values for initial iterations to prevent waviness from developing in the mesh, then dropping for a final iteration. As for the align step, you can load and save (latter if enabled) the fitting options.
+
+The following tutorial tasks each have a workflow associated with them which should be run in the usual way. 
+
+Task 1: Coarse plate model fitted to breast data
+------------------------------------------------
+
+Task 2: Fine plate model fitted to breast data
+----------------------------------------------
+
+Task 3: Coarse breast model fitted to breast data
+-------------------------------------------------
+
+Task 4: Fine breast model fitted to noisy data
+----------------------------------------------
+
+Task 5: Fine breast model fitted to sparse, noisy data
+------------------------------------------------------
+
+Task 6: Bilinear model fitted to point cloud
+--------------------------------------------
+
+
+Material Field Fitting
+======================
 
 Embedding material fields
  
