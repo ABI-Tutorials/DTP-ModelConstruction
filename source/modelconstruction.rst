@@ -108,7 +108,7 @@ The following tutorial tasks each have a workflow associated with them which sho
 Task 1: Coarse plate model fitted to breast data
 ------------------------------------------------
 
-Open the *breast1-coarse-plane* workflow and execute it. The breast data was obtained in 'prone' pose (hanging down) as done in MRI scans; this is also the simplest pose to digitise and fit to. Try manually aligning the surface with the breast data by Ctrl-clicking the left, middle or right mouse button and dragging to rotate, pan or scale the model. Project points and attempt to fit without any smoothing parameters. It takes several seconds to perform the fit: be patient! Try multiple fit iterations until the solution is stable. Re-project and try again.
+Open the *DTP-ModelBuilding-Task1* workflow and execute it. The breast data was obtained in 'prone' pose (hanging down) as done in MRI scans; this is also the simplest pose to digitise and fit to. Try manually aligning the surface with the breast data by Ctrl-clicking the left, middle or right mouse button and dragging to rotate, pan or scale the model. Project points and attempt to fit without any smoothing parameters. It takes several seconds to perform the fit: be patient! Try multiple fit iterations until the solution is stable. Re-project and try again.
 
 The result without smoothing even for this example with a coarse mesh and a relatively large number of high quality data points is quite wavy, particularly around the edges. It also has some unusual depressions about the front of the breasts which is not really representative of the data cloud in general.
 
@@ -121,7 +121,7 @@ Try fitting with poor initial alignment to see what happens.
 Task 2: Fine plate model fitted to breast data
 ----------------------------------------------
 
-Open the *breast2-fine-plane* workflow and execute it. It has the same data point cloud as the first task, but has a mesh with more than twice as many elements and approx. twice as many parameters, so it is more able to attain a close fit with the data, but takes longer to solve.
+Open the *DTP-ModelBuilding-Task2* workflow and execute it. It has the same data point cloud as the first task, but has a mesh with more than twice as many elements and approx. twice as many parameters, so it is more able to attain a close fit with the data, but takes longer to solve.
 
 Try some of the exercises from Task 1 with this model. With more elements the model is more susceptible to wavy solutions so applying appropriate smoothing penalties is more critical. 
 
@@ -130,12 +130,12 @@ When performing the second exercise from Task 1, iterate 3 times with the initia
 Task 3: Coarse breast model fitted to breast data
 -------------------------------------------------
 
-Open the *breast3-coarse-model* workflow and execute it. In this example the initial model is more breast-like in shape so when well-aligned the amount of fitting needed is reduced. You should be able to fit it with the lower strain penalty of 0.0001 directly in 2 iterations. Since the initial model is already so close, deformations will not be as great to get a close fit.
+Open the *DTP-ModelBuilding-Task3* workflow and execute it. In this example the initial model is more breast-like in shape so when well-aligned the amount of fitting needed is reduced. You should be able to fit it with the lower strain penalty of 0.0001 directly in 2 iterations. Since the initial model is already so close, deformations will not be as great to get a close fit.
 
 Task 4: Fine breast model fitted to noisy data
 ----------------------------------------------
 
-Open the *breast4-fine-model-noisy* workflow and execute it. This example uses a fine model with a breast-like shape, however random offsets up to +/- 5mm have been added to all data points. With a large enough number of data points the effect of randomness is diminished however in small areas the randomness can introduce waviness to the solution, so smoothing penalties must be applied.
+Open the *DTP-ModelBuilding-Task4* workflow and execute it. This example uses a fine model with a breast-like shape, however random offsets up to +/- 5mm have been added to all data points. With a large enough number of data points the effect of randomness is diminished however in small areas the randomness can introduce waviness to the solution, so smoothing penalties must be applied.
 
 Try fitting the model without any strain penalty, and fit with several iterations to see the waviness. Reset the fit and try with the regime from task 1: 2 iters at strain penalty 0.001, re-project, 1 iter at strain penalty 0.0001. The overall result is a good fit but there is unattractive waviness on the chest area. If a curvature penalty were available, these issues with noisy data could be better controlled.
 
@@ -145,14 +145,14 @@ Because of the random noise the mean error will never get very low, but the aver
 Task 5: Fine breast model fitted to sparse, noisy data
 ------------------------------------------------------
 
-Open the *breast5-fine-model-sparse-noisy* workflow and execute it. This example uses only 10% of the data points from the previous tasks and adds +/- 3mm error to each point.
+Open the *DTP-ModelBuilding-Task5* workflow and execute it. This example uses only 10% of the data points from the previous tasks and adds +/- 3mm error to each point.
 
 Try fitting as before. The effect of sparse data with random noise makes it even harder to obtain a close fit. Using the successful regime from Task 1 gives a result that is quite wavy after the final less-stiff fitting. Curvature penalties would greatly assist such models.
 
 Task 6: Bilinear model fitted to point cloud
 --------------------------------------------
 
-Open the *dome-linear* workflow and execute it. This example has a bilinear mesh and needs no alignment with the data point cloud.
+Open the *DTP-ModelBuilding-Task6* workflow and execute it. This example has a bilinear mesh and needs no alignment with the data point cloud.
 
 Project points and fit with all smoothing penalties set to zero. Rotate the result to see that it has developed a 'ridge' along one side, and the under-constrained corner elements distort unacceptably. Reset the fit, reproject and fit with the 'edge discontinuity penalty' set to 1. The result is much smoother. This penalty discourages solutions with differences in surface normals across edges of the mesh. Since the mesh uses bilinear interpolation, exact satisfaction of this condition cannot be met, nevertheless it minimises it as much as possible, and in particular it evens out this discontinuity since it is minimised in a 'least squares' sense.
 
