@@ -24,12 +24,28 @@ Common methods for creating the finite element mesh include:
 
 Surface model can be automatically extruded to 3-D models (triangles become wedges, squares become cubes). Also, different, higher-order basis functions can be used over the same topology to give more degrees of freedom in the model. This is particularly important for studying the human body as it contains few straight lines. In many models of body parts we employ C\ :sub:`1`\ -continuous cubic Hermite basis (interpolation) functions to model their inherent smoothness, and the following breast fitting examples demonstrate this. There is a downside to using Hermite bases: it is painstaking work to properly connect the mesh in areas where the topology is non-trivial, such as apex points, armpits etc.
 
-Mesh creation is a very involved topic; one needs to consider favourable alignment of elements with expected material behaviour, having sufficient density of elements to describe the problem with sufficient accuracy (the fitting examples below employ 2 different sized meshes to give some indication of the importance of mesh refinement) but overall one wishes to minimise the total number of degrees of freedom to reduce computation time. This tutorial does not go further into mesh creation at this time.
+Mesh creation is a very involved topic; one needs to consider favourable alignment of elements with expected material behaviour, having sufficient density of elements to describe the problem with sufficient accuracy (the fitting examples below employ 2 different sized meshes to give some indication of the importance of mesh refinement) but overall one wishes to minimise the total number of degrees of freedom to reduce computation time.
+
+Task 0: Visualising Model Construction
+--------------------------------------
+
+We will jump ahead to look at an example from the visualisation course as it's very illustrative of the process of building a model out of simple shapes. Open the *DTP-Visualisation-Task1* workflow and execute it. :numref:`fig_dtp_cp_modcon_heart_mesh_construction` shows a time sequence of constructing a heart model from this example which you will be able to view interactively.
+
+.. _fig_dtp_cp_modcon_heart_mesh_construction:
+
+.. figure:: _static/heart-mesh-construction.png
+   :align: center
+
+   Heart mesh construction stages: a single template element; multiple disconnected elements; elements merged into a connected mesh; mesh geometry gradually warped into the shape of the heart, closing up the sides and apex.
+
+This example opens up a SimpleViz viewer for a model that shows stages in constructing a heart model. At the left of the window is a toolbox; switch to the 'time' page of the tool box and drag the time slider between 0 and 1. Rotate, pan and zoom into the view with the mouse as per the description for Smoothfit Tool, below.
+
+In most of the model the initially cube-shaped elements are stretched, compressed or distorted, but they keep their essential cube or hexahedral *topology*. However, at the apex (bottom of the heart) the cubes are collapsed into wedge shapes, which can be done with care.
 
 Geometric Fitting
 =================
 
-This tutorial concentrates on directly fitting generic models to data point clouds obtained from an earlier segmentation or other digitisation step. Other types of fitting not covered include:
+The remainder of this tutorial concentrates on directly fitting generic models to data point clouds obtained from an earlier segmentation or other digitisation step. Other types of fitting not covered include:
 
 * Fitting to modes from a Principal Component Analysis, where the variation in geometry over a population is reduced to combinations of a small number of significant mode shapes and lesser modes are discarded;
 * Host-mesh fitting where the body is embedded in a coarse, smooth 'host' mesh, data is used to morph the host mesh and the embedded 'slave' mesh is moved with it.
@@ -51,8 +67,8 @@ This tutorial uses the 'smoothfit' MAP client plugin for interactive fitting wit
 
 .. figure:: _static/fitting-workflow.png
    :align: center
-   :figwidth: 95%
-   :width: 90%
+   :figwidth: 80%
+   :width: 75%
 
    Geometric fitting workflow in the MAP client framework.
 
@@ -62,14 +78,24 @@ When the workflow is executed, the smoothfit interface is displayed showing the 
 
 .. figure:: _static/fitting-align.png
    :align: center
-   :figwidth: 95%
-   :width: 90%
 
    Fitting step 1: Model alignment.
 
-In any of the views you may rotate, pan and zoom the view using the standard OpenCMISS-Zinc controls of left, middle and right mouse button drag, click 'View All' to recentre the view and click 'Done' to close the workflow step.
+In any of the views you may rotate, pan and zoom the view using the standard controls in the following table, click 'View All' to recentre the view and click 'Done' to close the workflow step:
 
-The first step in fitting is to scale the model and bring it into alignment with the point cloud; this is done so that the projections are as close and consistent as possible, as described below. To scale and align the model in this step, hold down the Ctrl key as you left, middle and right mouse button drag in the window: this moves the model relative to the data cloud. Be aware that rotation is a little difficult and may take practice. Other controls include alignment reset, auto centre and the Load button which will load a saved alignment. (The Save button can be disabled in the smoothfit configuration so tutorialsters don't accidentally wipe the good one that is saved for progressing to the next step!)
+======================= ==============
+Mouse Button            Transformation
+======================= ==============
+Left                    Tumble/Rotate
+----------------------- --------------
+Middle or Shift+Left    Pan/Translate
+----------------------- --------------
+Right or Ctrl+Left(Mac) Fly Zoom
+----------------------- --------------
+Shift+Right             Camera Zoom
+======================= ==============
+
+The first step in fitting is to scale the model and bring it into alignment with the point cloud; this is done so that the projections are as close and consistent as possible, as described below. To align and scale the model in this step, hold down the 'A' key as you left, middle and right mouse button drag in the window (or variant as in the above table): this moves the model relative to the data cloud. Be aware that rotation is a little difficult and may take practice. Other controls include alignment reset, auto centre and the Load button which will load a saved alignment. (The Save button can be disabled in the smoothfit configuration so tutorialsters don't accidentally wipe the good one that is saved for progressing to the next step!)
 
 Often the shape of the model and point cloud make it pretty clear where to align to. Note that this tool uses manual alignment, but other tools may make it automatic (based on shape analysis) or semi-automatic (e.g. by identifying 3 or more points on the data cloud as being key points on the model, and automatically transforming to align with them).
 
@@ -79,8 +105,6 @@ The second step in fitting is to project the data points onto the nearest locati
 
 .. figure:: _static/fitting-project.png
    :align: center
-   :figwidth: 95%
-   :width: 90%
 
    Fitting step 2: Projecting data points onto the model.
 
@@ -92,8 +116,6 @@ Switch to the next step '3. Fit' to configure and perform the fit. This is where
 
 .. figure:: _static/fitting-fit.png
    :align: center
-   :figwidth: 95%
-   :width: 90%
 
    Fitting step 3: Perform the fit
 
