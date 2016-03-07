@@ -13,7 +13,10 @@ Contents:
    
    modelconstruction
 
-
+.. toctree::
+   :hidden:
+   
+   ../README.rst
 
 Indices and tables
 ==================
