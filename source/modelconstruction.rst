@@ -9,22 +9,40 @@ Model construction consists of:
 #. *Geometric Fitting*: customising the geometry of the mesh to be physically realistic, or tailored to an individual.
 #. *Material Field Definition*: describing and fitting additional spatially-varying fields which affect behaviour of the body e.g. material properties such as fibre orientations for anisotropic materials. 
 
-This tutorial currently concentrates on geometric fitting, but gives overviews of the other topics. It uses the breast surface as the model for fitting, which is appropriate as customising breast models to individuals is needed to simulate deformation with change in pose, and this in turn helps co-locate regions of possible cancerous tissue from multiple medical images each made with different imaging devices which necessarily use different body poses.
+The central part of this tutorial fits models to breast surface data. This is a very practical application, since customising breast models to individuals is needed to simulate deformation with change in pose, and this in turn helps co-locate regions of possible cancerous tissue from multiple medical images each made with different imaging devices which necessarily use different body poses.
 
 Mesh Creation
 =============
 
 We are concerned with constructing models consisting of 'finite elements' -- simple shapes such as triangles, squares, cubes etc. -- which join together to form a 'mesh' which covers the body and describes its topology. Over the elements of the mesh we interpolate coordinates (and eventually other fields of interest) to give the model its 3-D shape and location. Usually mesh creation involves creating the elements and specifying at least initial coordinates for the model.
 
-Common methods for creating the finite element mesh include:
+Common methods for creating a finite element mesh include:
 
 #. Automatic mesh generation to boundaries described by segmented edges, point clouds or CAD models. Automated algorithms are usually limited to creating triangle (in 2-D) or tetrahedron (3-D) elements.
-#. Generating part or all the topology from simple, standard shapes such as plates, blocks and tubes, then relying on fitting to the geometry. The models used in the geometric fitting steps below were all generated from a plate topology and the tutorial involves fitting their geometry.
+#. Generating part or all the topology from simple, standard shapes such as plates, blocks and tubes, connecting them together then fitting to geometric data. The examples below use this approach.
 #. Manually building elements by selecting/creating corner points ('nodes') in the correct order. To ease creating a valid model, tools can assist by locking on to points from a surface or point cloud segmented from real medical images.
 
-Surface models can be automatically extruded to 3-D models (triangles become wedges, squares become cubes). Also, different, higher-order basis functions can be used over the same topology to give more degrees of freedom in the model. This is particularly important for studying the human body as it contains few straight lines. In many models of body parts we employ C\ :sub:`1`\ -continuous cubic Hermite basis (interpolation) functions to model their inherent smoothness, and the following breast fitting examples demonstrate this. There is a downside to using Hermite bases: very careful adjustments are needed to properly connect the mesh in areas where the topology is non-trivial, such as where rounded bodies are closed (top of head, apex of heart), bifurcations (between fingers, legs), and where mesh density needs to be increased.
+From a simpler mesh, more complicated models can be created. Surface models can be automatically extruded to 3-D models (triangles become wedges, squares become cubes). Also, different, higher-order basis functions can be used over the same topology to give more degrees of freedom in the model. This is particularly important for studying the human body as it contains few straight lines. In many models of body parts we employ C\ :sub:`1`\ -continuous cubic Hermite basis (interpolation) functions to model their inherent smoothness, and the following examples demonstrate this. There is a downside to using Hermite bases: very careful adjustments are needed to properly connect the mesh in areas where the topology is non-trivial, such as where rounded bodies are closed (top of head, apex of heart), bifurcations (between fingers, legs), and where mesh density needs to be increased.
 
 Mesh creation is a very involved topic; one needs to consider favourable alignment of elements with expected material behaviour, having sufficient density of elements to describe the problem with desired accuracy (the fitting examples below employ 2 different sized meshes to give some indication of the importance of mesh refinement). In contrast, one also wishes to minimise the model size (measured by total number of degrees of freedom) to reduce computation time.
+
+Interactive Graphics Controls
+-----------------------------
+
+The following tasks use interactive 3-D graphics. In any of the graphical workflow steps you may rotate, pan and zoom the view using the standard controls in the following table, click *View All* to recentre the view and click *Done* to complete/close the workflow step (and save the output model for subsequent workflow steps):
+
+======================= ==============
+Mouse Button            Transformation
+======================= ==============
+Left                    Tumble/Rotate
+----------------------- --------------
+Middle or Shift+Left    Pan/Translate
+----------------------- --------------
+Right or Ctrl+Left(Mac) Fly Zoom
+----------------------- --------------
+Shift+Right             Camera Zoom
+======================= ==============
+
 
 Task 0: Visualising Model Construction
 --------------------------------------
@@ -38,9 +56,52 @@ We will jump ahead to look at an example from the visualisation course as it's v
 
    Heart mesh construction stages: a single template element; multiple disconnected elements; elements merged into a connected mesh; mesh geometry gradually warped into the shape of the heart, closing up the sides and apex.
 
-This example opens up a SimpleViz viewer for a model that shows stages in constructing a heart model. At the left of the window is a toolbox; switch to the 'time' page of the tool box and drag the time slider between 0 and 1. Rotate, pan and zoom into the view with the mouse as per the description for the Smoothfit Tool, below.
+This example opens up a SimpleViz viewer for a model that shows stages in constructing a heart model. At the left of the window is a toolbox; switch to the 'time' page of the tool box and drag the time slider between 0 and 1. Rotate, pan and zoom into the view using the mouse controls described above.
 
 In most of the model the initially cube-shaped elements are stretched, compressed or distorted, but they keep their essential cube or hexahedral *topology*. However, at the apex (bottom of the heart) the cubes are collapsed into wedge shapes, which while being permissible is an approach which should be minimised.
+
+Task 1: Procedural Mesh Generation
+----------------------------------
+
+Open the *DTP-ModelBuilding-Task1* workflow and execute it. You will see the *Mesh Generator* interface as shown in :numref:`fig_dtp_cp_modcon_mesh_generator`:
+
+.. _fig_dtp_cp_modcon_mesh_generator:
+
+.. figure:: _static/mesh-generator.png
+   :align: center
+
+   Mesh generator interface 
+
+In this task you are encouraged to play: try all mesh types, vary the numbers of elements and options as applicable to the mesh type, turn on and off all graphics, delete elements and scale the mesh.
+
+The mesh types are 2-D plate, tube and sphere, 3-D box, tube and sphere shell. Typical for most finite elements, parameters (for the coordinates field) are held at corner points called 'nodes', and these are interpolated across the elements.
+
+Special to the elements in these generated mesh are node derivative parameters which are interpolated with *Hermite* basis functions to give smooth geometries. If you display *Node derivatives* you will see 2 or 3 arrows showing these derivative parameters which represent tangent vectors at the nodes. The *Xi axes* show the orientation of the coordinate system of each element. Hermite interpolation is simplest when the Xi axes and node derivatives are in line, and consistent between neighbouring elements; it's best to make this the case over most of a mesh.
+
+The elements around the apexes of the sphere meshes use *general linear maps* to sum the apex derivatives weighted by cos and sin terms to smoothly close the mesh at these points. This is generally needed wherever neighbouring elements' coordinates are not aligned.
+
+Ranges of elements can be deleted from the generated mesh, but this is best done after choosing the numbers of elements options for each mesh type. Note that parts of spheres can be deleted to make e.g. bottom or top hemispheres.
+
+All the current mesh types make a unit sized mesh by default, but the scale option allows this to be scaled differently in x, y and z.
+
+Task 2: Mesh Generation and Merging
+-----------------------------------
+
+Open the *DTP-ModelBuilding-Task2* workflow and execute it. Observe the mesh generation steps which make a hemisphere and a tube, then proceed to the Mesh Merger step:
+
+.. _fig_dtp_cp_modcon_mesh_merger:
+
+.. figure:: _static/mesh-merger.png
+   :align: center
+
+   Mesh merger interface, after merging master-slave nodes
+
+The first/top input to the Mesh Merger workflow step is the *master* mesh, which appears on the left of the interface, while the second/bottom input is the *slave* mesh, shown on the right. Merging is performed by matching (equating) node numbers from the master mesh with the ones in the slave. The master mesh is so named because it is unmodified by the merge: matched nodes on the slave are replaced by the equivalent master nodes, and the remaining slave nodes are transformed to fit the master, and they with the slave elements are added to the master mesh in the left panel, which is output by the workflow step.
+
+Note that this tool is relatively new and it can currently only translate the slave nodes to match the master, but it will eventually handle rotations to grossly align the slave, then a non-linear optimisation to smooth it out to reduce distortion where the two meshes joined.
+
+Feel free to change the matching nodes (which can be deleted by entering the number and pressing the 'Delete' push button, or edited by equating with a different slave node number). No harm is done if nonsense is entered!
+
 
 Geometric Fitting
 =================
@@ -75,19 +136,7 @@ When the workflow is executed, the smoothfit interface is displayed showing the 
 
    Interface for aligning the model with the data point cloud.
 
-In any of the views you may rotate, pan and zoom the view using the standard controls in the following table, click *View All* to recentre the view and click *Done* to close the workflow step (and save the output model for subsequent workflow steps):
-
-======================= ==============
-Mouse Button            Transformation
-======================= ==============
-Left                    Tumble/Rotate
------------------------ --------------
-Middle or Shift+Left    Pan/Translate
------------------------ --------------
-Right or Ctrl+Left(Mac) Fly Zoom
------------------------ --------------
-Shift+Right             Camera Zoom
-======================= ==============
+Smoothfit uses the interactive view controls defined earlier, including *View All* to recentre the view and click *Done* to close the workflow step and save the output model for subsequent workflow steps.
 
 In the Smoothfit user interface you can hover the mouse pointer over most controls to get help -- tool tips -- which explain what they do. 
 
@@ -160,10 +209,10 @@ Performing the fit can take a few seconds, and Smoothfit will appear to hang whe
 
 The following tutorial tasks each have a workflow associated with them which should be run in the usual way.
 
-Task 1: Coarse plate model fitted to breast data
+Task 3: Coarse plate model fitted to breast data
 ------------------------------------------------
 
-Open the *DTP-ModelBuilding-Task1* workflow and execute it. The breast data was obtained in 'prone' pose (hanging down) as done in MRI scans; this is also the simplest pose to digitise and fit to. Try manually aligning the surface with the breast data using the mouse controls described earlier (hold down 'A' key and the left, middle or right mouse button and drag to rotate, pan or scale the model). Project points and attempt to fit without any smoothing parameters. It takes several seconds to perform the fit: be patient! Try multiple fit iterations until the solution is stable. Re-project and try again.
+Open the *DTP-ModelBuilding-Task3* workflow and execute it. The breast data was obtained in 'prone' pose (hanging down) as done in MRI scans; this is also the simplest pose to digitise and fit to. Try manually aligning the surface with the breast data using the mouse controls described earlier (hold down 'A' key and the left, middle or right mouse button and drag to rotate, pan or scale the model). Project points and attempt to fit without any smoothing parameters. It takes several seconds to perform the fit: be patient! Try multiple fit iterations until the solution is stable. Re-project and try again.
 
 The result without smoothing even for this example with a coarse mesh and a relatively large number of high quality data points is quite wavy, particularly around the edges. It also has some unusual depressions about the front of the breasts which is not really representative of the data cloud in general.
 
@@ -187,36 +236,24 @@ As an extra exercise switch to the Align page to reset the fit, re-project point
 
 Also try fitting with very poor initial alignment to see what happens.
 
-Task 2: Fine plate model fitted to breast data
+Task 4: Fine plate model fitted to breast data
 ----------------------------------------------
 
-Open the *DTP-ModelBuilding-Task2* workflow and execute it. It has the same data point cloud as the first task, but has a mesh with more than twice as many elements and approximately twice as many parameters, so it is more able to attain a close fit with the data, but takes longer to solve.
+Open the *DTP-ModelBuilding-Task4* workflow and execute it. It has the same data point cloud as the first task, but has a mesh with more than twice as many elements and approximately twice as many parameters, so it is more able to attain a close fit with the data, but takes longer to solve.
 
 Try some of the exercises from Task 1 with this model. With more elements the model is more susceptible to wavy solutions so applying appropriate smoothing penalties is more critical. 
 
 When performing the second exercise from Task 1, iterate 3 times with the initial strain penalty of 0.001, then re-project points and fit with a strain penalty of 0.0001. Note down the mean and and error: the mean should be under half of the value from Task 1. More importantly, zoom in on the tips of the breasts to see that the fit is much better there.
 
-Task 3: Coarse breast model fitted to breast data
--------------------------------------------------
+Task 5: Fine plate model fitted to noisy data
+---------------------------------------------
 
-Open the *DTP-ModelBuilding-Task3* workflow and execute it. In this example the initial model is more breast-like in shape so when well-aligned the amount of fitting needed is reduced. You should be able to fit it with the lower strain penalty of 0.0001 directly in 2 iterations. Since the initial model is already so close, deformations will not be as great to get a close fit.
+Open the *DTP-ModelBuilding-Task5* workflow and execute it. This example uses the same fine plate model (make sure it has 8x5 elements with cross derivatives ticked), however random offsets up to +/- 5mm have been added to all data points. With a large enough number of data points the effect of randomness is diminished however in small areas the randomness can introduce waviness to the solution, so smoothing penalties must be applied.
 
-Task 4: Fine breast model fitted to noisy data
-----------------------------------------------
-
-Open the *DTP-ModelBuilding-Task4* workflow and execute it. This example uses a fine model with a breast-like shape, however random offsets up to +/- 5mm have been added to all data points. With a large enough number of data points the effect of randomness is diminished however in small areas the randomness can introduce waviness to the solution, so smoothing penalties must be applied.
-
-Try fitting the model without any strain penalty, and fit with several iterations to see the waviness. Reset the fit and try with the regime from task 1: 2 iters at strain penalty 0.001, re-project, 1 iter at strain penalty 0.0001. The overall result is a good fit but there is unattractive waviness on the chest area. If a curvature penalty were available, these issues with noisy data could be better controlled.
+Try fitting the model without any strain penalty, and fit with several iterations to see the waviness. Reset the fit and try with the regime from task 1: 2 iters at strain penalty 0.001, re-project, 1 iter at strain penalty 0.0001. The overall result is a good fit but there is unattractive waviness on the chest area. If a curvature penalty were available, these issues with noisy data could be better controlled. You may try turning off cross derivatives in the mesh generator; this should slightly help with waviness, and will make solution faster since it reduces the number of degrees of freedom in the problem.
 
 Because of the random noise the mean error will never get very low, but the average fit of the breast surface can be a reasonable 'best fit'.
 
-
-Task 5: Fine breast model fitted to sparse, noisy data
-------------------------------------------------------
-
-Open the *DTP-ModelBuilding-Task5* workflow and execute it. This example uses only 10% of the data points from the previous tasks and adds +/- 3mm error to each point.
-
-Try fitting as before. The effect of sparse data with random noise makes it even harder to obtain a close fit. Using the successful regime from Task 1 gives a result that is quite wavy after the final less-stiff fitting. Curvature penalties would greatly assist such models.
 
 Task 6: Bilinear model fitted to point cloud
 --------------------------------------------
