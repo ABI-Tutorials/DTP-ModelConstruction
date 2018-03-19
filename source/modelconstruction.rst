@@ -74,9 +74,9 @@ Open the *DTP-ModelBuilding-Task1* workflow and execute it. You will see the *Me
 
 In this task you are encouraged to play: try all mesh types, vary the numbers of elements and options as applicable to the mesh type, turn on and off all graphics, delete elements and scale the mesh.
 
-The mesh types are 2-D plate, tube and sphere, 3-D box, tube and sphere shell. Typical for most finite elements, parameters (for the coordinates field) are held at corner points called 'nodes', and these are interpolated across the elements.
+The mesh types include basic shapes such as 2-D plate, tube and sphere, 3-D box, tube and sphere shell. Other more complicated meshes are being added including whole organ mesh generators. Typical for most finite elements, parameters (for the coordinates field) are held at corner points called 'nodes', and these are interpolated across the elements.
 
-Special to the elements in these generated mesh are node derivative parameters which are interpolated with *Hermite* basis functions to give smooth geometries. If you display *Node derivatives* you will see 2 or 3 arrows showing these derivative parameters which represent tangent vectors at the nodes. The *Xi axes* show the orientation of the coordinate system of each element. Hermite interpolation is simplest when the Xi axes and node derivatives are in line, and consistent between neighbouring elements; it's best to make this the case over most of a mesh.
+Special to the elements in these generated mesh are node derivative parameters which are interpolated with *Hermite* basis functions to give smooth geometries. If you display *Node derivatives* you will see 2 or 3 arrows showing these derivative parameters which represent tangent vectors at the nodes. The *Xi axes* show the orientation of the coordinate system of each element. Hermite interpolation is simplest when the Xi axes and node derivatives are in-line, and consistent between neighbouring elements; it's best to make this the case over most of a mesh.
 
 The elements around the apexes of the sphere meshes use *general linear maps* to sum the apex derivatives weighted by cos and sin terms to smoothly close the mesh at these points. This is generally needed wherever neighbouring elements' coordinates are not aligned.
 
@@ -98,7 +98,7 @@ Open the *DTP-ModelBuilding-Task2* workflow and execute it. Observe the mesh gen
 
 The first/top input to the Mesh Merger workflow step is the *master* mesh, which appears on the left of the interface, while the second/bottom input is the *slave* mesh, shown on the right. Merging is performed by matching (equating) node numbers from the master mesh with the ones in the slave. The master mesh is so named because it is unmodified by the merge: matched nodes on the slave are replaced by the equivalent master nodes, and the remaining slave nodes are transformed to fit the master, and they with the slave elements are added to the master mesh in the left panel, which is output by the workflow step.
 
-Note that this tool is relatively new and it can currently only translate the slave nodes to match the master, but it will eventually handle rotations to grossly align the slave, then a non-linear optimisation to smooth it out to reduce distortion where the two meshes joined.
+This tool has recently been enhanced to allow master and slave nodes to be interactively selected in the 3-D view, by holding down the 'S' key and clicking on node numbers or node derivatives - one of these must be visible. The slave mesh is now automatically aligned with the master mesh, and there is the option to perform a fit to smooth it out to reduce distortion where the two meshes joined (but beware: it can be slow). Another new feature is that the list of master=slave pairings can be edited, however the changes don't take effect until the 'Apply' button is pressed.
 
 Feel free to change the matching nodes (which can be deleted by entering the number and pressing the 'Delete' push button, or edited by equating with a different slave node number). No harm is done if nonsense is entered!
 
