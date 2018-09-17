@@ -1,20 +1,26 @@
-
 ==================
 Model Construction
 ==================
 
 Model construction consists of:
 
-#. *Mesh Creation*: creating a finite element mesh with a topology and interpolation suited to describing the body of interest to the level of detail required.
-#. *Geometric Fitting*: customising the geometry of the mesh to be physically realistic, or tailored to an individual.
-#. *Material Field Definition*: describing and fitting additional spatially-varying fields which affect behaviour of the body e.g. material properties such as fibre orientations for anisotropic materials. 
+#. **Mesh Creation**: creating a finite element mesh with a topology and interpolation suited to describing the body of interest to the level of detail required.
+#. **Geometric Fitting**: customising the geometry of the mesh to be physically realistic, or tailored to an individual.
+#. **Material Field Definition**: describing and fitting additional spatially-varying fields which affect behaviour of the body e.g. material properties such as fibre orientations for anisotropic materials. 
+
+This tutorial consists of the following topics:
+
+.. contents::
+   :local:
+   :depth: 2 
+   :backlinks: top   
 
 The central part of this tutorial fits models to breast surface data. This is a very practical application, since customising breast models to individuals is needed to simulate deformation with change in pose, and this in turn helps co-locate regions of possible cancerous tissue from multiple medical images each made with different imaging devices which necessarily use different body poses.
 
 Mesh Creation
 =============
 
-We are concerned with constructing models consisting of 'finite elements' -- simple shapes such as triangles, squares, cubes etc. -- which join together to form a 'mesh' which covers the body and describes its topology. Over the elements of the mesh we interpolate coordinates (and eventually other fields of interest) to give the model its 3-D shape and location. Usually mesh creation involves creating the elements and specifying at least initial coordinates for the model.
+We are concerned with constructing models consisting of 'finite elements' -- simple shapes such as triangles, squares, cubes, etc. - which join together to form a 'mesh' which covers the body and describes its topology. Over the elements of the mesh we interpolate coordinates (and eventually other fields of interest) to give the model its 3-D shape and location. Usually mesh creation involves creating the elements and specifying at least initial coordinates for the model.
 
 Common methods for creating a finite element mesh include:
 
@@ -43,7 +49,6 @@ Right or Ctrl+Left(Mac) Fly Zoom
 Shift+Right             Camera Zoom
 ======================= ==============
 
-
 Task 0: Visualising Model Construction
 --------------------------------------
 
@@ -54,23 +59,23 @@ We will jump ahead to look at an example from the visualisation course as it's v
 .. figure:: _static/heart-mesh-construction.png
    :align: center
 
-   Heart mesh construction stages: a single template element; multiple disconnected elements; elements merged into a connected mesh; mesh geometry gradually warped into the shape of the heart, closing up the sides and apex.
+   Heart Mesh Construction stages: a single template element; multiple disconnected elements; elements merged into a connected mesh; mesh geometry gradually warped into the shape of the heart, closing up the sides and apex.
 
-This example opens up a SimpleViz viewer for a model that shows stages in constructing a heart model. At the left of the window is a toolbox; switch to the 'time' page of the tool box and drag the time slider between 0 and 1. Rotate, pan and zoom into the view using the mouse controls described above.
+This example opens up a SimpleViz viewer for a model that shows stages in constructing a heart model. At the left of the window is a toolbox; switch to the 'Time' tab of the toolbox and drag the time slider between 0 and 1. Rotate, pan and zoom into the view using the mouse controls described above.
 
 In most of the model the initially cube-shaped elements are stretched, compressed or distorted, but they keep their essential cube or hexahedral *topology*. However, at the apex (bottom of the heart) the cubes are collapsed into wedge shapes, which while being permissible is an approach which should be minimised.
 
 Task 1: Procedural Mesh Generation
 ----------------------------------
 
-Open the *DTP-ModelBuilding-Task1* workflow and execute it. You will see the *Mesh Generator* interface as shown in :numref:`fig_dtp_cp_modcon_mesh_generator`:
+Open the *DTP-ModelConstruction-Task1* workflow and execute it. You will see the *Mesh Generator* interface as shown in :numref:`fig_dtp_cp_modcon_mesh_generator`:
 
 .. _fig_dtp_cp_modcon_mesh_generator:
 
-.. figure:: _static/mesh-generator.png
+.. figure:: _static/mesh-generator-new.png
    :align: center
 
-   Mesh generator interface 
+   Mesh Generator Interface 
 
 In this task you are encouraged to play: try all mesh types, vary the numbers of elements and options as applicable to the mesh type, turn on and off all graphics, delete elements and scale the mesh.
 
@@ -80,21 +85,36 @@ Special to the elements in these generated mesh are node derivative parameters w
 
 The elements around the apexes of the sphere meshes use *general linear maps* to sum the apex derivatives weighted by cos and sin terms to smoothly close the mesh at these points. This is generally needed wherever neighbouring elements' coordinates are not aligned.
 
-Ranges of elements can be deleted from the generated mesh, but this is best done after choosing the numbers of elements options for each mesh type. Note that parts of spheres can be deleted to make e.g. bottom or top hemispheres.
+Ranges of elements can be deleted from the generated mesh, but this is best done after choosing the numbers of elements options for each mesh type. **Note** that parts of spheres can be deleted to make e.g. bottom or top hemispheres.
 
 All the current mesh types make a unit sized mesh by default, but the scale option allows this to be scaled differently in x, y and z.
 
 Task 2: Mesh Generation and Merging
 -----------------------------------
 
-Open the *DTP-ModelBuilding-Task2* workflow and execute it. Observe the mesh generation steps which make a hemisphere and a tube, then proceed to the Mesh Merger step:
+Open the *DTP-ModelConstruction-Task2* workflow and execute it. A *Mesh Generator* interface is displayed with 'Identifier: hemisphere' and other fields to input all the required values. Mention the element ID range to delete and get the bottom hemisphere as shown below:
+
+.. figure:: _static/mesh-generator_part1.png
+   :align: center
+
+   Mesh Generator Part 1: Hemisphere
+
+Click on *Done*. On the new mesh generator interface, the 'identifier: tube' with other required input fields are displayed as below:
+
+
+.. figure:: _static/mesh-generator_part2.png
+   :align: center
+
+   Mesh Generator Part 2: Tube
+
+After the mesh generation of the hemisphere and the tube, clicking on *Done* takes you to the 'Mesh Merger' stage. Observe the 'Identifier: hemisphere-tube' with merged *master=slave* nodes as shown here:
 
 .. _fig_dtp_cp_modcon_mesh_merger:
 
-.. figure:: _static/mesh-merger.png
+.. figure:: _static/mesh-merger-new.png
    :align: center
 
-   Mesh merger interface, after merging master-slave nodes
+   Mesh Merger Interface, after merging master-slave nodes
 
 The first/top input to the Mesh Merger workflow step is the *master* mesh, which appears on the left of the interface, while the second/bottom input is the *slave* mesh, shown on the right. Merging is performed by matching (equating) node numbers from the master mesh with the ones in the slave. The master mesh is so named because it is unmodified by the merge: matched nodes on the slave are replaced by the equivalent master nodes, and the remaining slave nodes are transformed to fit the master, and they with the slave elements are added to the master mesh in the left panel, which is output by the workflow step.
 
@@ -106,7 +126,7 @@ Feel free to change the matching nodes (which can be deleted by entering the num
 Geometric Fitting
 =================
 
-The remainder of this tutorial concentrates on directly fitting simple models to data point clouds obtained from an earlier segmentation or other digitisation step. Other types of fitting not covered include:
+The remainder of this tutorial concentrates on directly fitting simple models to data point clouds obtained from an earlier segmentation or other digitisation step. Other types of fitting **not** covered include:
 
 * Fitting to modes from a Principal Component Analysis, where the variation in geometry over a population is reduced to linear combinations of a small number of significant mode shapes (key model poses), and lesser modes are discarded;
 * Host-mesh fitting where the body is embedded in a coarse, smooth *host* mesh, data is used to morph the host mesh and the embedded *slave* mesh is moved with it.
@@ -116,7 +136,7 @@ In many cases the above methods are used as a first step to get a close approxim
 Smoothfit Tool
 --------------
 
-This tutorial uses the *Smoothfit* MAP client plugin for interactive fitting. The inputs to Smoothfit in a workflow are a model file and a point cloud file (each currently limited to EX or FieldML formats that can be read by OpenCMISS-Zinc). The workflow in the MAP client is shown in :numref:`fig_dtp_cp_modcon_fitting_workflow`, and requires only the input files to be specified (and workflow step identifiers to be named):
+This tutorial uses the *Smoothfit* MAP client plugin for interactive fitting. The inputs to Smoothfit in a workflow are a model file and a point cloud file (each currently limited to EX or FieldML formats that can be read by OpenCMISS-Zinc). The *DTP-Smoothfit-Tutorial* workflow in the MAP client is shown in :numref:`fig_dtp_cp_modcon_fitting_workflow`, and requires only the input files to be specified (and workflow step identifiers to be named):
 
 .. _fig_dtp_cp_modcon_fitting_workflow:
 
@@ -127,7 +147,7 @@ This tutorial uses the *Smoothfit* MAP client plugin for interactive fitting. Th
 
    Geometric fitting workflow in the MAP client framework.
 
-When the workflow is executed, the smoothfit interface is displayed showing the model as a semi-transparent surface and the point cloud as a cloud of small crosses. The initial view in :numref:`fig_dtp_cp_modcon_fitting_align` shows the interface in its pre-fitting *Align* state.
+When the *DTP-Smoothfit-Tutorial* workflow is executed, the smoothfit interface is displayed showing the model as a semi-transparent surface and the point cloud as a cloud of small crosses. The initial view in :numref:`fig_dtp_cp_modcon_fitting_align` shows the interface in its pre-fitting *Align* state.
 
 .. _fig_dtp_cp_modcon_fitting_align:
 
@@ -212,7 +232,7 @@ The following tutorial tasks each have a workflow associated with them which sho
 Task 3: Coarse plate model fitted to breast data
 ------------------------------------------------
 
-Open the *DTP-ModelBuilding-Task3* workflow and execute it. The breast data was obtained in 'prone' pose (hanging down) as done in MRI scans; this is also the simplest pose to digitise and fit to. Try manually aligning the surface with the breast data using the mouse controls described earlier (hold down 'A' key and the left, middle or right mouse button and drag to rotate, pan or scale the model). Project points and attempt to fit without any smoothing parameters. It takes several seconds to perform the fit: be patient! Try multiple fit iterations until the solution is stable. Re-project and try again.
+Open the *DTP-ModelConstruction-Task3* workflow and execute it. The breast data was obtained in 'prone' pose (hanging down) as done in MRI scans; this is also the simplest pose to digitise and fit to. Try manually aligning the surface with the breast data using the mouse controls described earlier (hold down 'A' key and the left, middle or right mouse button and drag to rotate, pan or scale the model). Project points and attempt to fit without any smoothing parameters. It takes several seconds to perform the fit: be patient! Try multiple fit iterations until the solution is stable. Re-project and try again.
 
 The result without smoothing even for this example with a coarse mesh and a relatively large number of high quality data points is quite wavy, particularly around the edges. It also has some unusual depressions about the front of the breasts which is not really representative of the data cloud in general.
 
@@ -239,7 +259,7 @@ Also try fitting with very poor initial alignment to see what happens.
 Task 4: Fine plate model fitted to breast data
 ----------------------------------------------
 
-Open the *DTP-ModelBuilding-Task4* workflow and execute it. It has the same data point cloud as the first task, but has a mesh with more than twice as many elements and approximately twice as many parameters, so it is more able to attain a close fit with the data, but takes longer to solve.
+Open the *DTP-ModelConstruction-Task4* workflow and execute it. It has the same data point cloud as the first task, but has a mesh with more than twice as many elements and approximately twice as many parameters, so it is more able to attain a close fit with the data, but takes longer to solve.
 
 Try some of the exercises from Task 1 with this model. With more elements the model is more susceptible to wavy solutions so applying appropriate smoothing penalties is more critical. 
 
@@ -248,7 +268,7 @@ When performing the second exercise from Task 1, iterate 3 times with the initia
 Task 5: Fine plate model fitted to noisy data
 ---------------------------------------------
 
-Open the *DTP-ModelBuilding-Task5* workflow and execute it. This example uses the same fine plate model (make sure it has 8x5 elements with cross derivatives ticked), however random offsets up to +/- 5mm have been added to all data points. With a large enough number of data points the effect of randomness is diminished however in small areas the randomness can introduce waviness to the solution, so smoothing penalties must be applied.
+Open the *DTP-ModelConstruction-Task5* workflow and execute it. This example uses the same fine plate model (make sure it has 8x5 elements with cross derivatives ticked), however random offsets up to +/- 5mm have been added to all data points. With a large enough number of data points the effect of randomness is diminished however in small areas the randomness can introduce waviness to the solution, so smoothing penalties must be applied.
 
 Try fitting the model without any strain penalty, and fit with several iterations to see the waviness. Reset the fit and try with the regime from task 1: 2 iters at strain penalty 0.001, re-project, 1 iter at strain penalty 0.0001. The overall result is a good fit but there is unattractive waviness on the chest area. If a curvature penalty were available, these issues with noisy data could be better controlled. You may try turning off cross derivatives in the mesh generator; this should slightly help with waviness, and will make solution faster since it reduces the number of degrees of freedom in the problem.
 
@@ -258,7 +278,7 @@ Because of the random noise the mean error will never get very low, but the aver
 Task 6: Bilinear model fitted to point cloud
 --------------------------------------------
 
-Open the *DTP-ModelBuilding-Task6* workflow and execute it. This example has a bilinear mesh and needs no alignment with the data point cloud.
+Open the *DTP-ModelConstruction-Task6* workflow and execute it. This example has a bilinear mesh and needs no alignment with the data point cloud.
 
 Project points and fit with all smoothing penalties set to zero. Rotate the result to see that it has developed a 'ridge' along one side, and the under-constrained corner elements distort unacceptably. Reset the fit (switch to Align and back to Fit pages), reproject and fit with the 'edge discontinuity penalty' set to 1. The result is much smoother. This penalty discourages solutions with differences in surface normals across edges of the mesh. Since the mesh uses bilinear interpolation, exact satisfaction of this condition cannot be met, nevertheless it minimises it as much as possible, and in particular it evens out this discontinuity since it is minimised in a 'least squares' sense.
 
