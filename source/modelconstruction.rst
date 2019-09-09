@@ -225,9 +225,15 @@ Beware that projections are not recalculated during the fitting: you must manual
 
 Switching back to the :guilabel:`Align` page clears the fitted solution altogether.
 
-The penalty values allow you to smooth the fit by penalising particular deformations. The strain penalty limits excessive strain in the model so where there is absent or noisy data, solutions which minimise the deformation from the initial aligned state are favoured. The edge discontinuity penalty is only useful for non-C\ :sub:`1`\ -continuous coordinate fields such as the final linear mesh example. Penalties always increase the data point projection error (in a least squares sense, which is the solution method used in the fitting), but generally give a much more attractive result. Penalty values should be adjusted in orders of magnitude until a likeable result is obtained, then fine-tuned. It is often better to use stiffer (higher penalty) values for initial iterations (gross fitting) to prevent waviness from developing in the mesh, then re-projecting and reducing penalties for a final iteration (fine fitting). As for the alignment settings, you can load and save (if enabled) the fitting options.
+The penalty values allow you to smooth the fit by penalising particular deformations:
 
-Note that Smoothfit does not yet offer a curvature penalty which is one of the most powerful tools for dealing with noisy or sparse data. Using the strain penalty is the next best thing but isn't as good at dealing with excessive waviness in the solution, particularly since higher values capable of helping the waviness may considerably reduce the accuracy of the fit. This shortcoming will hopefully be rectified in a later version.
+1. **Strain Penalty** values limit straining (stretch or compression) in all directions; large values will keep linear dimensions close to the original model.
+2. **Curvature Penalty** values limit curvature/waviness of the model, and are very useful for making smooth, attractive fits from noisy data. (Note this is a new feature, not yet shown in the screen shots in this documentation.)
+3. **Edge Discontinuity Penalty** values limit angles between adjacent elements across edges, useful for less-than C\ :sub:`1`\ -continuous coordinate fields e.g. the final linear mesh example.
+
+Applying penalties always increases the data point projection error (in a least squares sense, which is the solution method used in the fitting), but generally give a much more attractive result. One should always try to use the smallest value which gives the desired model appearance but still acceptably fits the data points. Low values have a negligible effect on fitting accuracy where there is plenty of data, and the most effect where data is absent, near the edge of the model or noisy.
+
+There is not necessarily a standard value to use for any of the penalty values as it must balance against the model size and number of data points per element. A common strategy is to adjust values by 1-2 orders of magnitude until a likeable result is obtained, then fine-tune. It is often better to use stiffer (higher penalty) values for initial iterations (gross fitting) to prevent waviness from developing in the mesh, then re-projecting and reducing penalties for a final iteration (fine fitting). As for the alignment settings, you can load and save (if enabled) the fitting options.
 
 Performing the fit can take a few seconds, and Smoothfit will appear to hang when fitting is in progress. Processing time is longer with more elements, more complex elements, more data points and when applying penalty terms.
 
@@ -265,9 +271,11 @@ Task 4: Fine plate model fitted to breast data
 
 Open the 'DTP-ModelConstruction-Task4' workflow and execute it. It has the same data point cloud as the first task, but has a mesh with more than twice as many elements and approximately twice as many parameters, so it is more able to attain a close fit with the data, but takes longer to solve.
 
-Try some of the exercises from Task 1 with this model. With more elements the model is more susceptible to wavy solutions so applying appropriate smoothing penalties is more critical. 
+Try some of the exercises from Task 1 with this model. With more elements the model is more susceptible to wavy solutions so applying appropriate smoothing penalties is more critical.
 
 When performing the second exercise from Task 1, iterate 3 times with the initial strain penalty of 0.001, then re-project points and fit with a strain penalty of 0.0001. Note down the mean and and error: the mean should be under half of the value from Task 1. More importantly, zoom in on the tips of the breasts to see that the fit is much better there.
+
+Reset by switching to Align mode and back, then project and fit with a Curvature Penalty of 10 and Strain Penalty of 0. Reproject and re-fit a second time. You'll find this gives a very attractive result, even after 1 iteration.
 
 Task 5: Fine plate model fitted to noisy data
 ---------------------------------------------
@@ -275,6 +283,8 @@ Task 5: Fine plate model fitted to noisy data
 Open the 'DTP-ModelConstruction-Task5' workflow and execute it. This example uses the same fine plate model (make sure it has 8x5 elements with cross derivatives ticked), however random offsets up to +/- 5mm have been added to all data points. With a large enough number of data points the effect of randomness is diminished however in small areas the randomness can introduce waviness to the solution, so smoothing penalties must be applied.
 
 Try fitting the model without any strain penalty, and fit with several iterations to see the waviness. Reset the fit and try with the regime from task 1: 2 iters at strain penalty 0.001, re-project, 1 iter at strain penalty 0.0001. The overall result is a good fit but there is unattractive waviness on the chest area. If a curvature penalty were available, these issues with noisy data could be better controlled. You may try turning off cross derivatives in the mesh generator; this should slightly help with waviness, and will make solution faster since it reduces the number of degrees of freedom in the problem.
+
+Reset by switching to Align mode and back, then project and fit with a Curvature Penalty of 10 and Strain Penalty of 0. Reproject and re-fit a second time. You'll find this gives a very attractive result that keeps close to the mean surface of these noisy points.
 
 Because of the random noise the mean error will never get very low, but the average fit of the breast surface can be a reasonable 'best fit'.
 
